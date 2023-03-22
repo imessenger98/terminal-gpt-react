@@ -1,20 +1,40 @@
+/**
+ * Author: Messenger_1012
+ */
+
 import React, { useState } from "react";
-import './App.css';
+
+import callOpenAi from "../common";
+import Thinking from "./Thinking";
+import "./App.css";
 
 function App() {
   const [inputValue, setInputValue] = useState("");
   const [chatLog, setChatLog] = useState([]);
-  const [username, setUsername] =useState("messenger_1012");
+  const [username, setUsername] = useState("messenger_1012");
+  const [thinking, setThinking] = useState(false);
+  const userPrompt = `${username}@tgpt ~ %`;
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
+    setThinking(true);
     event.preventDefault();
     if (inputValue.trim() !== "") {
-      setChatLog([...chatLog, { text: inputValue, sender: "user" }]);
-      setInputValue("");
-      // TODO: endo cheyan indu
+      setChatLog((prevChatLog) => [
+        ...prevChatLog,
+        { text: `${userPrompt} ${inputValue}`, sender: "user" },
+      ]);
+      const response = await callOpenAi(inputValue);
+      if (response) {
+        setInputValue("");
+        setChatLog((prevChatLog) => [
+          ...prevChatLog,
+          { text: response, sender: "bot" },
+        ]);
+        setThinking(false);
+      }
     }
   };
 
@@ -27,13 +47,19 @@ function App() {
           </p>
         ))}
         <form onSubmit={handleFormSubmit}>
-          <span className="prompt">{`${username}@tgpt ~ %`}</span>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            autoFocus
-          />
+          {thinking ? (
+            <Thinking />
+          ) : (
+            <>
+              <span className="prompt">{userPrompt}</span>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                autoFocus
+              />
+            </>
+          )}
         </form>
       </div>
     </div>
