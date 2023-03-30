@@ -5,13 +5,17 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { SettingOutlined } from "@ant-design/icons";
+
 import callOpenAi from "../common";
 import Thinking from "./Thinking";
+import SettingsModal from "./SettingsModal";
 import "./App.css";
 
 function App() {
   const [inputValue, setInputValue] = useState("");
   const [chatLog, setChatLog] = useState([]);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [username, setUsername] = useState("messenger_1012");
   const [thinking, setThinking] = useState(false);
   const userPrompt = `${username}@tgpt ~ %`;
@@ -65,36 +69,46 @@ function App() {
       )),
     [chatLog]
   );
+  const settingsModal = () => {
+    setSettingsModalOpen((prev) => !prev);
+  };
 
   return (
-    <div className="terminal-chat">
-      <div className="terminal-window">
-        {messageComponents}
-        {thinking ? (
-          <Thinking />
-        ) : (
-          <>
-            <div className="main">
-              <span className="prompt">{userPrompt}</span>
-              <textarea
-                type="text"
-                value={inputValue}
-                onChange={handleInputChange}
-                autoFocus
-                onKeyDown={(event) => {
-                  const key = event.key || event.which; // Use key if available, fallback to which event.which deprecated
-                  if (key === "Enter" || key === 13) {
-                    handleFormSubmit();
-                  }
-                }}
-                onPaste={handlePaste}
-                ref={inputRef}
-              />
-            </div>
-          </>
-        )}
+    <>
+      <div className="terminal-chat">
+        <SettingOutlined className="btn-settings" onClick={settingsModal} />
+        <div className="terminal-window">
+          {messageComponents}
+          {thinking ? (
+            <Thinking />
+          ) : (
+            <>
+              <div className="main">
+                <span className="prompt">{userPrompt}</span>
+                <textarea
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  autoFocus
+                  onKeyDown={(event) => {
+                    const key = event.key || event.which; // Use key if available, fallback to which event.which deprecated
+                    if (key === "Enter" || key === 13) {
+                      handleFormSubmit();
+                    }
+                  }}
+                  onPaste={handlePaste}
+                  ref={inputRef}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      <SettingsModal
+        settingsModalOpen={settingsModalOpen}
+        setSettingsModalOpen={setSettingsModalOpen}
+      />
+    </>
   );
 }
 
