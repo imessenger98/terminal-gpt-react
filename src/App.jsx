@@ -1,9 +1,10 @@
-/**
- * Author: Messenger_1012
- */
-
-import React, { useState } from "react";
-
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import callOpenAi from "../common";
 import Thinking from "./Thinking";
 import "./App.css";
@@ -14,53 +15,84 @@ function App() {
   const [username, setUsername] = useState("messenger_1012");
   const [thinking, setThinking] = useState(false);
   const userPrompt = `${username}@tgpt ~ %`;
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
+  const inputRef = useRef(null);
 
-  const handleFormSubmit = async (event) => {
+  useEffect(() => {
+    const terminalChat = document.querySelector(".terminal-chat");
+    terminalChat.addEventListener("click", () => {
+      inputRef.current.focus();
+    });
+  }, []);
+
+  const handleInputChange = useCallback((event) => {
+    const textarea = event.target;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    setInputValue(textarea.value);
+  }, []);
+
+  const handlePaste = useCallback((event) => {
+    const pastedText = event.clipboardData.getData("text");
+    const modifiedText = pastedText.replace(/(\r\n|\n|\r)/gm, "\n"); // Replace any line breaks with newline characters
+    setInputValue(modifiedText);
+  }, []);
+
+  const handleFormSubmit = useCallback(async () => {
     setThinking(true);
-    event.preventDefault();
     if (inputValue.trim() !== "") {
       setChatLog((prevChatLog) => [
         ...prevChatLog,
-        { text: `${userPrompt} ${inputValue}`, sender: "user" },
+        { id: Date.now(), text: `${userPrompt} ${inputValue}`, sender: "user" },
       ]);
       const response = await callOpenAi(inputValue);
       if (response) {
         setInputValue("");
         setChatLog((prevChatLog) => [
           ...prevChatLog,
-          { text: response, sender: "bot" },
+          { id: Date.now(), text: response, sender: "bot" },
         ]);
         setThinking(false);
       }
     }
-  };
+  }, [inputValue, userPrompt]);
+
+  const messageComponents = useMemo(
+    () =>
+      chatLog.map((message) => (
+        <p key={message.id} className={`message ${message.sender}`}>
+          {message.text}
+        </p>
+      )),
+    [chatLog]
+  );
 
   return (
     <div className="terminal-chat">
       <div className="terminal-window">
-        {chatLog.map((message, index) => (
-          <p key={index} className={`message ${message.sender}`}>
-            {message.text}
-          </p>
-        ))}
-        <form onSubmit={handleFormSubmit}>
-          {thinking ? (
-            <Thinking />
-          ) : (
-            <>
+        {messageComponents}
+        {thinking ? (
+          <Thinking />
+        ) : (
+          <>
+            <div className="main">
               <span className="prompt">{userPrompt}</span>
-              <input
+              <textarea
                 type="text"
                 value={inputValue}
                 onChange={handleInputChange}
                 autoFocus
+                onKeyDown={(event) => {
+                  const key = event.key || event.which; // Use key if available, fallback to which event.which deprecated
+                  if (key === "Enter" || key === 13) {
+                    handleFormSubmit();
+                  }
+                }}
+                onPaste={handlePaste}
+                ref={inputRef}
               />
-            </>
-          )}
-        </form>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

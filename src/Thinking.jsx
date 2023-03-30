@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
 
-export default function Thinking() {
-  const emoticons = [":)", ":|"];
-  const [currentEmoticonIndex, setCurrentEmoticonIndex] = useState(0);
+const LoadingDots = () => {
+  const [dotCount, setDotCount] = useState(0);
+
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setCurrentEmoticonIndex((currentEmoticonIndex + 1) % emoticons.length);
-    }, 500);
-
+      setDotCount((dotCount) => (dotCount + 1) % 4);
+    }, 250);
     return () => clearInterval(intervalId);
-  }, [currentEmoticonIndex]);
+  }, []);
 
-  return <h6 className="message">Thinking{emoticons[currentEmoticonIndex]}</h6>;
-}
+  return <h6 className="message">{`Thinking ${".".repeat(dotCount)}`}</h6>;
+};
+
+export default LoadingDots;

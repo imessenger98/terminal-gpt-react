@@ -25,6 +25,7 @@ body {
   margin: 5px 0;
   font-family: monospace;
   font-size: 14px;
+  font-weight: 400;
 }
 
 .message.user {
@@ -42,7 +43,7 @@ body {
   color: #ffff;
 }
 
-input[type='text'] {
+textarea[type="text"] {
   display: inline-block;
   border: none;
   background-color: transparent;
@@ -50,4 +51,12 @@ input[type='text'] {
   font-family: monospace;
   font-size: 14px;
   outline: none;
+  flex-grow: 1;
+  overflow: hidden;
+  resize: none;
+  
+}
+
+.main {
+  display: flex;
 }
