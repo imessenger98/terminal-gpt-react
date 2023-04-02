@@ -49,17 +49,16 @@ export default function SettingsModal(props) {
           rules={[{ validator: validateAccessToken }]}
         >
           <Input placeholder="Enter API key" />
-          <p class="description">
-            To get your OpenAPI key, please visit:{" "}
-            <a
-              href="https://platform.openai.com/account/api-keys"
-              target="_blank"
-            >
-              openAi
-            </a>
-          </p>
         </Form.Item>
-
+        <p class="description">
+          To get your OpenAPI key, please visit:{" "}
+          <a
+            href="https://platform.openai.com/account/api-keys"
+            target="_blank"
+          >
+            openAi
+          </a>
+        </p>
         <Form.Item
           name="username"
           label="Prompt"
