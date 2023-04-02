@@ -68,3 +68,12 @@ textarea[type="text"] {
   right: 10px;
   z-index: 2;
 }
+
+.warning {
+  margin-right: 5px;
+  font-family: monospace;
+  color: #ff0000;
+}
+.cancelButton {
+  margin: 10px;
+}

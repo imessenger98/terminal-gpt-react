@@ -16,7 +16,9 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [username, setUsername] = useState("messenger_1012");
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || "messenger_1012"
+  );
   const [thinking, setThinking] = useState(false);
   const userPrompt = `${username}@tgpt ~ %`;
   const inputRef = useRef(null);
@@ -83,6 +85,11 @@ function App() {
             <Thinking />
           ) : (
             <>
+              <p className="warning">
+                {localStorage.getItem("token")
+                  ? null
+                  : "API key not found. The request will fail with a status code of 401. Please set the API key in the settings."}
+              </p>
               <div className="main">
                 <span className="prompt">{userPrompt}</span>
                 <textarea
@@ -107,6 +114,7 @@ function App() {
       <SettingsModal
         settingsModalOpen={settingsModalOpen}
         setSettingsModalOpen={setSettingsModalOpen}
+        setUsername={setUsername}
       />
     </>
   );
