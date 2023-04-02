@@ -74,6 +74,16 @@ textarea[type="text"] {
   font-family: monospace;
   color: #ff0000;
 }
+
 .cancelButton {
   margin: 10px;
+}
+
+.description {
+  font-size: 10px;
+  font-weight: bold;
+  color: gray;
+  margin: 0;
+  padding: 0;
+  font-family: 'Courier New', Courier, monospace;
 }
