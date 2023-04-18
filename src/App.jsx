@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { Input } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 
 import callOpenAi from "../common";
@@ -21,42 +22,34 @@ function App() {
   );
   const [thinking, setThinking] = useState(false);
   const userPrompt = `${username}@tgpt ~ %`;
+  const message = `${userPrompt} ${inputValue}`;
+  const errorMessage = "API key not found. The request will fail with a status code of 401. Please set the API key in the settings.";
   const inputRef = useRef(null);
+  const { TextArea } = Input;
 
   useEffect(() => {
-    const terminalChat = document.querySelector(".terminal-chat");
-    terminalChat.addEventListener("click", () => {
-      inputRef.current.focus();
-    });
+    inputRef.current.focus();
   }, []);
 
   const handleInputChange = useCallback((event) => {
-    const textarea = event.target;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-    setInputValue(textarea.value);
+    setInputValue(event.target.value);
   }, []);
 
-  const handlePaste = useCallback((event) => {
-    const pastedText = event.clipboardData.getData("text");
-    const modifiedText = pastedText.replace(/(\r\n|\n|\r)/gm, "\n"); // Replace any line breaks with newline characters
-    setInputValue(modifiedText);
+  const addUserMessage = useCallback((message, sender) => {
+    setChatLog((prevChatLog) => [
+      ...prevChatLog,
+      { id: Date.now(), text: message, sender },
+    ]);
   }, []);
 
   const handleFormSubmit = useCallback(async () => {
-    setThinking(true);
     if (inputValue.trim() !== "") {
-      setChatLog((prevChatLog) => [
-        ...prevChatLog,
-        { id: Date.now(), text: `${userPrompt} ${inputValue}`, sender: "user" },
-      ]);
+      setThinking(true);
+      addUserMessage(message, "user");
       const response = await callOpenAi(inputValue);
       if (response) {
         setInputValue("");
-        setChatLog((prevChatLog) => [
-          ...prevChatLog,
-          { id: Date.now(), text: response, sender: "bot" },
-        ]);
+        addUserMessage(response, "bot");
         setThinking(false);
       }
     }
@@ -65,9 +58,14 @@ function App() {
   const messageComponents = useMemo(
     () =>
       chatLog.map((message) => (
-        <p key={message.id} className={`message ${message.sender}`}>
-          {message.text}
-        </p>
+        <TextArea
+          autoSize
+          key={message.id}
+          className={`message ${message.sender}`}
+          value={message.text}
+          bordered={false}
+          readOnly
+        />
       )),
     [chatLog]
   );
@@ -88,22 +86,18 @@ function App() {
               <p className="warning">
                 {localStorage.getItem("token")
                   ? null
-                  : "API key not found. The request will fail with a status code of 401. Please set the API key in the settings."}
+                  : errorMessage}
               </p>
               <div className="main">
                 <span className="prompt">{userPrompt}</span>
-                <textarea
-                  type="text"
+                <TextArea
+                  className="inputArea"
                   value={inputValue}
                   onChange={handleInputChange}
                   autoFocus
-                  onKeyDown={(event) => {
-                    const key = event.key || event.which; // Use key if available, fallback to which event.which deprecated
-                    if (key === "Enter" || key === 13) {
-                      handleFormSubmit();
-                    }
-                  }}
-                  onPaste={handlePaste}
+                  autoSize
+                  bordered={false}
+                  onPressEnter={handleFormSubmit}
                   ref={inputRef}
                 />
               </div>

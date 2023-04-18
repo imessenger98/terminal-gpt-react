@@ -10,7 +10,7 @@ const LoadingDots = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  return <h6 className="message">{`Thinking ${".".repeat(dotCount)}`}</h6>;
+  return <p className="message">{`Thinking ${".".repeat(dotCount)}`}</p>;
 };
 
 export default LoadingDots;
