@@ -4,7 +4,8 @@ import { UserOutlined } from "@ant-design/icons";
 import "./App.css";
 
 export default function SettingsModal(props) {
-  const { settingsModalOpen, setSettingsModalOpen, setUsername } = props;
+  const { settingsModalOpen, setSettingsModalOpen, setUsername, username } =
+    props;
   const onFinish = (values) => {
     setSettingsModalOpen(false);
     window.location.reload();
@@ -28,7 +29,7 @@ export default function SettingsModal(props) {
   const initialValues = {
     accessToken:
       import.meta.env.VITE_SECRET_KEY || localStorage.getItem("token") || null,
-    username: localStorage.getItem("username") || null,
+    username: username || localStorage.getItem("username") || null,
   };
   const closeButton = () => {
     setSettingsModalOpen(false);
@@ -50,7 +51,7 @@ export default function SettingsModal(props) {
         >
           <Input placeholder="Enter API key" />
         </Form.Item>
-        <p class="description">
+        <span className="description">
           To get your OpenAPI key, please visit:{" "}
           <a
             href="https://platform.openai.com/account/api-keys"
@@ -58,7 +59,7 @@ export default function SettingsModal(props) {
           >
             openAi
           </a>
-        </p>
+        </span>
         <Form.Item
           name="username"
           label="Prompt"

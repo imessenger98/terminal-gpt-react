@@ -129,6 +129,7 @@ function App() {
         settingsModalOpen={settingsModalOpen}
         setSettingsModalOpen={setSettingsModalOpen}
         setUsername={setUsername}
+        username={username}
       />
     </>
   );
