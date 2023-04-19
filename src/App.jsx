@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { Input } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
+import ReactMarkdown from "react-markdown";
 
 import callOpenAi from "../common";
 import Thinking from "./Thinking";
@@ -23,7 +24,8 @@ function App() {
   const [thinking, setThinking] = useState(false);
   const userPrompt = `${username}@tgpt ~ %`;
   const message = `${userPrompt} ${inputValue}`;
-  const errorMessage = "API key not found. The request will fail with a status code of 401. Please set the API key in the settings.";
+  const errorMessage =
+    "API key not found. The request will fail with a status code of 401. Please set the API key in the settings.";
   const inputRef = useRef(null);
   const { TextArea } = Input;
 
@@ -45,28 +47,42 @@ function App() {
   const handleFormSubmit = useCallback(async () => {
     if (inputValue.trim() !== "") {
       setThinking(true);
+      const fullConversation =
+        chatLog
+          .map((message) => `${message.sender}: ${message.text}`)
+          .join("\n") +
+        "\n" +
+        message;
       addUserMessage(message, "user");
-      const response = await callOpenAi(inputValue);
+      const response = await callOpenAi(fullConversation);
       if (response) {
         setInputValue("");
         addUserMessage(response, "bot");
         setThinking(false);
       }
     }
-  }, [inputValue, userPrompt]);
+  }, [inputValue]);
 
   const messageComponents = useMemo(
     () =>
-      chatLog.map((message) => (
-        <TextArea
-          autoSize
-          key={message.id}
-          className={`message ${message.sender}`}
-          value={message.text}
-          bordered={false}
-          readOnly
-        />
-      )),
+      chatLog.map((message) =>
+        message.sender === "user" ? (
+          <TextArea
+            autoSize
+            key={message.id}
+            className={`message ${message.sender}`}
+            value={message.text}
+            bordered={false}
+            readOnly
+          />
+        ) : (
+          <ReactMarkdown
+            key={message.id}
+            children={message.text}
+            className={`message ${message.sender}`}
+          />
+        )
+      ),
     [chatLog]
   );
   const settingsModal = () => {
@@ -84,9 +100,7 @@ function App() {
           ) : (
             <>
               <p className="warning">
-                {localStorage.getItem("token")
-                  ? null
-                  : errorMessage}
+                {localStorage.getItem("token") ? null : errorMessage}
               </p>
               <div className="main">
                 <span className="prompt">{userPrompt}</span>
