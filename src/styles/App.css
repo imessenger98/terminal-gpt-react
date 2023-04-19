@@ -20,7 +20,7 @@ body {
   font-family: monospace;
   font-size: 14px;
   font-weight: 400;
-  padding-left: 4px ;
+  padding-left: 4px;
 }
 
 .message.user {
@@ -34,7 +34,7 @@ body {
   background-color: transparent;
   font-family: monospace;
   font-size: 14px;
-  padding-left: 4px ;
+  padding-left: 4px;
   margin: 0;
 }
 

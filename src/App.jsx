@@ -1,128 +1,63 @@
-import React, {
+import {
+  React,
   useState,
   useRef,
-  useEffect,
   useCallback,
-  useMemo,
-} from "react";
-import { Input } from "antd";
-import { SettingOutlined } from "@ant-design/icons";
-import ReactMarkdown from "react-markdown";
-
-import callOpenAi from "../common";
-import Thinking from "./Thinking";
-import SettingsModal from "./SettingsModal";
-import "./App.css";
+  SettingOutlined,
+  Thinking,
+  SettingsModal,
+  MessageList,
+  Terminal,
+  submitForm,
+} from "./imports";
+import "./styles/App.css";
 
 function App() {
   const [inputValue, setInputValue] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [username, setUsername] = useState(
-    localStorage.getItem("username") || "messenger_1012"
+    localStorage.getItem("username") || "terminal"
   );
   const [thinking, setThinking] = useState(false);
   const userPrompt = `${username}@tgpt ~ %`;
   const message = `${userPrompt} ${inputValue}`;
-  const errorMessage =
-    "API key not found. The request will fail with a status code of 401. Please set the API key in the settings.";
   const inputRef = useRef(null);
-  const { TextArea } = Input;
-
-  useEffect(() => {
-    const terminalChat = document.querySelector(".terminal");
-    terminalChat.addEventListener("click", () => {
-      inputRef.current.focus();
-    });
-  });
 
   const handleInputChange = useCallback((event) => {
     setInputValue(event.target.value);
   }, []);
 
-  const addUserMessage = useCallback((message, sender) => {
-    setChatLog((prevChatLog) => [
-      ...prevChatLog,
-      { id: Date.now(), text: message, sender },
-    ]);
-  }, []);
-
   const handleFormSubmit = useCallback(async () => {
-    if (inputValue.trim() !== "") {
-      setThinking(true);
-      const fullConversation =
-        chatLog
-          .map((message) => `${message.sender}: ${message.text}`)
-          .join("\n") +
-        "\n" +
-        message;
-      addUserMessage(message, "user");
-      const response = await callOpenAi(fullConversation);
-      if (response) {
-        setInputValue("");
-        const filtered = response.replace(/\bbot:\s/g, "");
-        addUserMessage(filtered, "bot");
-        setThinking(false);
-      }
-    }
+    await submitForm({
+      inputValue,
+      message,
+      chatLog,
+      setThinking,
+      setInputValue,
+      setChatLog,
+    });
   }, [inputValue]);
 
-  const messageComponents = useMemo(
-    () =>
-      chatLog.map((message) =>
-        message.sender === "user" ? (
-          <TextArea
-            autoSize
-            key={message.id}
-            className={`message ${message.sender}`}
-            value={message.text}
-            bordered={false}
-            readOnly
-          />
-        ) : (
-          <ReactMarkdown
-            key={message.id}
-            children={message.text}
-            className={`message ${message.sender}`}
-          />
-        )
-      ),
-    [chatLog]
-  );
-  const settingsModal = () => {
-    setSettingsModalOpen((prev) => !prev);
-  };
+  const openSettingsModal = () => setSettingsModalOpen((prev) => !prev);
 
   return (
     <>
       <div className="Main">
-        <SettingOutlined className="btn-settings" onClick={settingsModal} />
+        <SettingOutlined className="btn-settings" onClick={openSettingsModal} />
         <div className="messageComponents">
-          {messageComponents}
-          <div className="terminal">
-            {thinking ? (
-              <Thinking />
-            ) : (
-              <>
-                <p className="warning">
-                  {localStorage.getItem("token") ? null : errorMessage}
-                </p>
-                <div className="terminal-chat">
-                  <span className="prompt">{userPrompt}</span>
-                  <TextArea
-                    className="inputArea"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    autoFocus
-                    autoSize
-                    bordered={false}
-                    onPressEnter={handleFormSubmit}
-                    ref={inputRef}
-                  />
-                </div>
-              </>
-            )}
-          </div>
+          <MessageList chatLog={chatLog} />
+          {thinking ? (
+            <Thinking />
+          ) : (
+            <Terminal
+              userPrompt={userPrompt}
+              inputValue={inputValue}
+              handleInputChange={handleInputChange}
+              handleFormSubmit={handleFormSubmit}
+              inputRef={inputRef}
+            />
+          )}
         </div>
       </div>
       <SettingsModal

@@ -1,12 +1,13 @@
 import React from "react";
 import { Form, Modal, Input, Button } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import "./App.css";
+import "../styles/App.css";
 
 export default function SettingsModal(props) {
   const { settingsModalOpen, setSettingsModalOpen, setUsername, username } =
     props;
-  const onFinish = (values) => {
+
+  const onFinish = () => {
     setSettingsModalOpen(false);
     window.location.reload();
   };
@@ -19,11 +20,17 @@ export default function SettingsModal(props) {
   };
 
   const validateUsername = async (rule, value) => {
+    const regex = /^[A-Za-z0-9]+$/;
     if (!value) {
-      throw new Error("Please enter a Prompt");
+      throw new Error("Please enter a prompt.");
+    } else if (!regex.test(value)) {
+      throw new Error(
+        "Only capital letters, small letters, and numbers are allowed."
+      );
+    } else {
+      localStorage.setItem("username", value);
+      setUsername(value);
     }
-    localStorage.setItem("username", value);
-    setUsername(value);
   };
 
   const initialValues = {
@@ -31,9 +38,11 @@ export default function SettingsModal(props) {
       import.meta.env.VITE_SECRET_KEY || localStorage.getItem("token") || null,
     username: username || localStorage.getItem("username") || null,
   };
+
   const closeButton = () => {
     setSettingsModalOpen(false);
   };
+
   return (
     <Modal
       title="Settings"
@@ -65,7 +74,7 @@ export default function SettingsModal(props) {
           label="Prompt"
           rules={[{ validator: validateUsername }]}
         >
-          <Input prefix={<UserOutlined />} placeholder="Enter Prompt" />
+          <Input prefix={<UserOutlined />} placeholder="Enter Prompt for the terminal" />
         </Form.Item>
 
         <Form.Item>
