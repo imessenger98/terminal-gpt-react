@@ -30,8 +30,11 @@ function App() {
   const { TextArea } = Input;
 
   useEffect(() => {
-    inputRef.current.focus();
-  }, []);
+    const terminalChat = document.querySelector(".terminal");
+    terminalChat.addEventListener("click", () => {
+      inputRef.current.focus();
+    });
+  });
 
   const handleInputChange = useCallback((event) => {
     setInputValue(event.target.value);
@@ -57,7 +60,8 @@ function App() {
       const response = await callOpenAi(fullConversation);
       if (response) {
         setInputValue("");
-        addUserMessage(response, "bot");
+        const filtered = response.replace(/\bbot:\s/g, "");
+        addUserMessage(filtered, "bot");
         setThinking(false);
       }
     }
@@ -91,32 +95,34 @@ function App() {
 
   return (
     <>
-      <div className="terminal-chat">
+      <div className="Main">
         <SettingOutlined className="btn-settings" onClick={settingsModal} />
-        <div className="terminal-window">
+        <div className="messageComponents">
           {messageComponents}
-          {thinking ? (
-            <Thinking />
-          ) : (
-            <>
-              <p className="warning">
-                {localStorage.getItem("token") ? null : errorMessage}
-              </p>
-              <div className="main">
-                <span className="prompt">{userPrompt}</span>
-                <TextArea
-                  className="inputArea"
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  autoFocus
-                  autoSize
-                  bordered={false}
-                  onPressEnter={handleFormSubmit}
-                  ref={inputRef}
-                />
-              </div>
-            </>
-          )}
+          <div className="terminal">
+            {thinking ? (
+              <Thinking />
+            ) : (
+              <>
+                <p className="warning">
+                  {localStorage.getItem("token") ? null : errorMessage}
+                </p>
+                <div className="terminal-chat">
+                  <span className="prompt">{userPrompt}</span>
+                  <TextArea
+                    className="inputArea"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    autoFocus
+                    autoSize
+                    bordered={false}
+                    onPressEnter={handleFormSubmit}
+                    ref={inputRef}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <SettingsModal
